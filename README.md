@@ -1,5 +1,5 @@
-# tcc - código finalizado do sistema (hardware)
+# tcc - código finalizado do sistema (hardware) e testes
 
-Código de funcionamento do sistema de irrigação da Esp32 por controle de tempo de ativação.
+Código de funcionamento do sistema de irrigação juntamente com 2 testes produzidos para averiguação da montagem.
 
 by: Talita
