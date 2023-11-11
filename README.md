@@ -1,3 +1,3 @@
-# tcc_cod_finalizado_hardware
+# tcc código finalizado do sistema (hardware)
 
-Código de funcionamento do sistema de irrigação da Esp32 
+Código de funcionamento do sistema de irrigação da Esp32 por controle de tempo de ativação.
