@@ -6,5 +6,7 @@ Código de funcionamento do sistema de irrigação juntamente com 2 testes produ
 
 Com a Esp32 instalado no software do Arduino IDE, coloque o projeto na porta "WEMOS LOLIN32 Lite" (a porta indicada para este tipo de Esp32).
 No celular instale o aplicativo "Serial Bluetooth Terminal" para enviar os comandos via "bluetooth" e rodar o código finalizado (e também, se quiser, rodar os códigos testes).
+</br></br>
+Lembrando que apenas os códigos testes foram testados e apenas o led foi aprovado.
 
 by: Talita
