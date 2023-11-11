@@ -1,0 +1,137 @@
+// Código de Funcionamento para Sistema de Monitoramento e Irrigação com Arduino
+#include "BluetoothSerial.h"
+
+const char *pin = "1234";
+
+String device_name = "ESP32-WROOM-DA";
+
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and anable it
+#endif
+
+#if !defined(CONFIG_BT_SPP_ENABLED)
+#error Serial Bluetooth not available or not enabled. It is only available for the ESP32 chip.
+#endif
+
+BluetoothSerial SerialBT;
+
+const int Bomba = 0; // Porta onde a bomba está conectada (rele no pino 0)
+
+const unsigned long intervaloDuasVezesAoDia = 43200UL; // Intervalo de 12 horas em segundos para duas vezes ao dia - samambaia
+const unsigned long intervaloUmaVezPorMes = 2592000UL; // Intervalo de um mês em segundos (30 dias) para uma vez por mês - suculenta
+const unsigned long intervalo24Horas = 86400UL; // Intervalo de 24 horas em segundos - salsinha
+const unsigned long intervaloUmaVezNaSemana = 1209600UL; // Intervalo de duas semanas em segundos (14 dias) - orquidea
+const unsigned long intervaloDiaSimDiaNao = 345600UL; // Intervalo de 4 dias em segundos (dia sim, dia não) - alface
+const unsigned long intervalo3Dias = 259200UL; // Intervalo máximo de 3 dias em segundos - cebolinha
+
+
+unsigned long ultimaAtivacaoDuasVezesAoDia = 0; // Variável para armazenar o tempo da última ativação de duas vezes ao dia
+unsigned long ultimaAtivacaoUmaVezPorMes = 0; // Variável para armazenar o tempo da última ativação de uma vez por mês
+unsigned long ultimaAtivacao24Horas = 0; // Variável para armazenar o tempo da última ativação de 24 horas
+unsigned long ultimaAtivacaoUmaVezNaSemana = 0; // Variável para armazenar o tempo da última ativação de uma vez na semana
+unsigned long ultimaAtivacaoDiaSimDiaNao = 0; // Variável para armazenar o tempo da última ativação de alface
+unsigned long ultimaAtivacao3Dias = 0; // Variável para armazenar o tempo da última ativação de cebolinha
+
+
+void setup() {
+  Serial.begin(115200);                      // Declara o BaundRate 
+  Serial.println("Ta funcionando");
+  SerialBT.begin(device_name);
+  Serial.printf("The device with name \"%s\" is started.\nNow you can pair it with Bluetooth!\n", device_name.c_str());
+  #ifdef USE_PIN
+    SerialBT.setPin(pin);
+    Serial.println("Using PIN");
+  #endif
+
+  pinMode(Bomba, OUTPUT);               // Declara o pinoRele como Saída
+}
+
+void loop() {
+
+  digitalWrite(Bomba, LOW);
+
+  // vericação da conexão via bluetooth
+  if (Serial.available()) {
+
+    SerialBT.write(Serial.read());
+  }
+
+  if (SerialBT.available()) {
+    char entrada = SerialBT.read();  // Lê o caractere disponível
+
+  unsigned long tempoAtual = millis(); // Obtém o tempo atual em milissegundos
+
+// Lógica para as plantas
+
+  if (entrada == '1') { // samambaia
+
+    if (tempoAtual - ultimaAtivacaoDuasVezesAoDia >= intervaloDuasVezesAoDia * 1000) {
+      digitalWrite(Bomba, HIGH);
+      delay(3000);  // Simulando a rega por 1 segundo
+      digitalWrite(Bomba, LOW);
+      ultimaAtivacaoDuasVezesAoDia = tempoAtual;
+    }
+  }
+
+  if (entrada == '2') { // suculenta
+
+    if (tempoAtual - ultimaAtivacaoUmaVezPorMes >= intervaloUmaVezPorMes * 1000) {
+      digitalWrite(Bomba, HIGH);
+      delay(15000);  // Simulando a rega por 3 segundos
+      digitalWrite(Bomba, LOW);
+      ultimaAtivacaoUmaVezPorMes = tempoAtual;
+    }
+  }
+
+  if (entrada == '3') { // salsinha
+
+  // Verifica se passaram 24 horas desde a última ativação de 24 horas
+  if (tempoAtual - ultimaAtivacao24Horas >= intervalo24Horas * 1000) {
+    // Realiza a ação para o intervalo de 24 horas aqui
+    // Exemplo: ligar a bomba por 3 segundos
+    digitalWrite(Bomba, HIGH);
+    delay(15000);
+    digitalWrite(Bomba, LOW);
+    ultimaAtivacao24Horas = tempoAtual; // Atualiza o tempo da última ativação de 24 horas para o momento atual
+  }}
+
+  if (entrada == '4') { // orquidea
+
+  // Verifica se passou uma semana desde a última ativação de duas vezes na semana
+  if (tempoAtual - ultimaAtivacaoDuasVezesNaSemana >= intervaloDuasVezesNaSemana * 1000) {
+    // Realiza a ação para o intervalo de duas vezes na semana aqui
+    // Exemplo: ligar a bomba por 3 segundos
+    digitalWrite(Bomba, HIGH);
+    delay(5000);
+    digitalWrite(Bomba, LOW);
+    ultimaAtivacaoDuasVezesNaSemana = tempoAtual; // Atualiza o tempo da última ativação de duas vezes na semana para o momento atual
+  }}
+
+ if (entrada == '5') { // cebolinha
+
+    if (tempoAtual - ultimaAtivacao3Dias >= intervalo3Dias * 1000) {
+      digitalWrite(Bomba, HIGH);
+      delay(12000);  // Simulando a rega 
+      digitalWrite(Bomba, LOW);
+      ultimaAtivacao3Dias = tempoAtual;
+    }
+  }
+
+ if (entrada == '6') { // alface
+
+    if (tempoAtual - ultimaAtivacaoDiaSimDiaNao >= intervaloDiaSimDiaNao * 1000) {
+      digitalWrite(Bomba, HIGH);
+      delay(3000);  // Simulando a rega 
+      digitalWrite(Bomba, LOW);
+      ultimaAtivacaoDiaSimDiaNao = tempoAtual;
+    }
+  }
+
+}}
+
+#samambaia - 2X ao dia - pouca água
+#suculenta - 1X por mes - muita água
+#orquidea - 2X na semana - muita água
+#salsinha - todo dia - pouca água
+#alface - 4 dias (dia sim, dia não) - muita água (fazer furos na base para que o excesso de água escoe)
+#cebolinha - 1 a três dias - pouca água
